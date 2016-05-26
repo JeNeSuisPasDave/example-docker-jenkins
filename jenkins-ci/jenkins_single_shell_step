@@ -1,0 +1,28 @@
+# Build the image to be used for this job.
+#
+IMAGE=$(docker build . | tail -1 | awk '{ print $NF }')
+
+# Execute the build inside Docker.
+#
+CMD_="mkdir -p /opt/project"
+CMD_="$CMD_ && ln -s ${WORKSPACE} /opt/project/workspace"
+CMD_="$CMD_ && cd /opt/project/workspace"
+CMD_="$CMD_ && rake spec"
+CONTAINER=$(docker run -d --volumes-from dv_jenkins_workspace \
+  "$IMAGE" /bin/bash -c "$CMD_")
+
+# Attach to the container so that we can see the output.
+#
+docker attach $CONTAINER
+
+# As soon as the process exits, get its return value.
+#
+RC=$(docker wait $CONTAINER)
+
+# Delete the container we've just used.
+#
+docker rm $CONTAINER
+
+# Exit with the same value as the container.
+#
+exit $RC

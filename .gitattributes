@@ -1,0 +1,4 @@
+# Because many files get copied into Docker images, we force _all_ text
+# files to have Unix line endings. Because these are Linux Docker images.
+#
+* text eol=lf
